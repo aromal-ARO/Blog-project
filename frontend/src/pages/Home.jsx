@@ -19,26 +19,24 @@ const Home = () => {
   const {user}=useContext(UserContext)
   // console.log(user)
 
-  const fetchPosts=async()=>{
-    setLoader(true)
-    try{
-      const res=await axios.get(URL+"/api/posts/"+search)
-      // console.log(res.data)
-      setPosts(res.data)
-      if(res.data.length===0){
-        setNoResults(true)
+  const fetchPosts = async () => {
+    setLoader(true);
+    try {
+      const res = await axios.get(URL + "/api/posts/" + search);
+      // Sort posts by creation date in descending order
+      const sortedPosts = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setPosts(sortedPosts);
+      if (sortedPosts.length === 0) {
+        setNoResults(true);
+      } else {
+        setNoResults(false);
       }
-      else{
-        setNoResults(false)
-      }
-      setLoader(false)
-      
+      setLoader(false);
+    } catch (err) {
+      console.log(err);
+      setLoader(true);
     }
-    catch(err){
-      console.log(err)
-      setLoader(true)
-    }
-  }
+  };
 
   useEffect(()=>{
     fetchPosts()

@@ -10,6 +10,9 @@ const authRoute=require('./routes/auth')
 const userRoute=require('./routes/users')
 const postRoute=require('./routes/posts')
 const commentRoute=require('./routes/comments')
+const bodyParser=require('body-parser')
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
 
 //database
 const connectDB=async()=>{
@@ -52,6 +55,50 @@ app.post("/api/upload",upload.single("file"),(req,res)=>{
     // console.log(req.body)
     res.status(200).json("Image has been uploaded successfully!")
 })
+
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID ,// Replace with your Razorpay key
+    key_secret: process.env.RAZORPAY_KEY_SECRET, // Replace with your Razorpay secret
+  });
+  
+  // Endpoint to create an order
+  app.post('/create-order', async (req, res) => {
+    const { amount, currency, receipt } = req.body;
+  
+    try {
+      const options = {
+        amount: amount, // amount in smallest currency unit (paise for INR)
+        currency: currency || 'INR',
+        receipt: receipt,
+        payment_capture: 1, // auto capture payment
+      };
+  
+      const order = await razorpay.orders.create(options);
+      res.json(order);
+    } catch (error) {
+      console.error('Error creating order:', error);
+      res.status(500).json({ error: 'Failed to create order' });
+    }
+  });
+  
+  // Endpoint to verify payment
+  app.post('/verify-payment', (req, res) => {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    
+    // Create the expected signature
+    const generatedSignature = crypto
+      .createHmac('sha256', 'YOUR_RAZORPAY_KEY_SECRET') // Replace with your Razorpay secret
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+  
+    // Compare the signatures
+    if (generatedSignature === razorpay_signature) {
+      res.json({ success: true });
+    } else {
+      res.json({ success: false });
+    }
+  });
+
 
 
 app.listen(process.env.PORT,()=>{
