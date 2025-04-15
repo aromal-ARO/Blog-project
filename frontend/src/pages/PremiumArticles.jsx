@@ -67,7 +67,7 @@ const PremiumArticles = () => {
 
   const handlePayment = async (article) => {
     const options = {
-      key: "rzp_test_zlfvgH6aJMl5Xb", // Your Razorpay key
+      key: "", // Your Razorpay key
       amount: article.price * 100,
       currency: "INR",
       name: "Article Store",
