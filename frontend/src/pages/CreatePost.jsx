@@ -210,7 +210,7 @@ const CreatePost = () => {
                 </div>
             </motion.div>
             
-            <Chatbot apiKey="AIzaSyDNI_j-G5BxIM2pav3NYTAkiMaBpiVya2I" />
+            <Chatbot apiKey="" />
             <Footer />
         </div>
     )
